@@ -23,6 +23,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.2 2020/03/12 Fix cancel behavior on touch input
 // 1.1.1 2020/03/11 Add "show cancel command" option
 // 1.1.0 2020/03/10 Fork from ChangeActorImageSystem.js
 // ----------------------------------------------------------------------------
@@ -390,6 +391,7 @@
     this._actorSelect_Window.backOpacity = $window_opacity_CAIS;
     this._actorSelect_Window.opacity = $window_opacity_CAIS;
     this.addWindow(this._actorSelect_Window);
+    this._actorSelect_Window.setHandler('cancel', this.comandCancelSelectingActor.bind(this));
   };
 
   Scene_ChangeActorImageSystem.prototype.update = function() {
