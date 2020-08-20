@@ -1,4 +1,23 @@
 //=====================================
+// UTSU_ChangeActorImageSystem.js
+//=====================================
+// Copyright (c) 2020 Utsuda
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// ----------------------------------------------------------------------------
+// Version
+// 1.1.3 2020/08/20 Update Copyright more better
+// 1.1.2 2020/03/12 Fix cancel behavior on touch input
+// 1.1.1 2020/03/11 Add "show cancel command" option
+// 1.1.0 2020/03/10 Fork from ChangeActorImageSystem.js
+// ----------------------------------------------------------------------------
+// [GitHub] : https://github.com/utsudashinou
+// [Twitter]: https://twitter.com/virtualUtsuda
+//=============================================================================
+//
+// This plugin was forked from Tsumio's ChangeActorImageSystem.js, which is subject to the same license.
+// Here is the original copyright notice for ChangeActorImageSystem.js:
+//=====================================
 // ChangeActorImageSystem.js
 //=====================================
 // Copyright (c) 2017 Tsumio
@@ -15,21 +34,7 @@
 // [Twitter]: https://twitter.com/TsumioNtGame
 //=============================================================================
 //
-//=====================================
-// UTSU_ChangeActorImageSystem.js
-//=====================================
-// Copyright (c) 2020 Utsuda
-// This software is released under the MIT License.
-// http://opensource.org/licenses/mit-license.php
-// ----------------------------------------------------------------------------
-// Version
-// 1.1.2 2020/03/12 Fix cancel behavior on touch input
-// 1.1.1 2020/03/11 Add "show cancel command" option
-// 1.1.0 2020/03/10 Fork from ChangeActorImageSystem.js
-// ----------------------------------------------------------------------------
-// [GitHub] : https://github.com/utsudashinou
-// [Twitter]: https://twitter.com/virtualUtsuda
-//=============================================================================
+//
 /*:
  * @plugindesc アクターの画像を変えます
  * @author ツミオ, ウツダ
