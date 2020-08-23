@@ -6,6 +6,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.0 2020/08/23 Add X/Y offset option
 // 1.0.0 2020/08/21 Release
 // ----------------------------------------------------------------------------
 // [GitHub] : https://github.com/utsudashinou
@@ -33,6 +34,11 @@
  * RPGツクールMVは基本60fpsです。元のポーズサインはその1/16なので、
  * 初期値は3.75fpsです。
  *
+ * 「X軸方向のオフセット」
+ * 「Y軸方向のオフセット」
+ * ポーズサインの表示位置にオフセットを加えます。
+ * 位置をずらす時に設定してください。
+ *
  * @param pauseSignImage
  * @text ポーズサイン
  * @desc ポーズサインのスプライトシート
@@ -58,6 +64,27 @@
  * @decimals 2
  * @default 3.75
  * @require 1
+ *
+ * @param pauseSignOffsetX
+ * @text X軸方向のオフセット
+ * @desc X軸方向のオフセット
+ * 初期値: 0
+ * @type number
+ * @min -9007199254740991
+ * @max 9007199254740991
+ * @default 0
+ * @require 1
+ *
+ * @param pauseSignOffsetY
+ * @text Y軸方向のオフセット
+ * @desc Y軸方向のオフセット
+ * 初期値: 0
+ * @type number
+ * @min -9007199254740991
+ * @max 9007199254740991
+ * @default 0
+ * @require 1
+ *
  */
 
 const parameters = PluginManager.parameters("UTSU_PauseSignEx");
@@ -65,6 +92,8 @@ const params = {};
 params.pauseSignImage = parameters["pauseSignImage"] || "pauseSign";
 params.pauseSignNum = Number(parameters["pauseSignNum"] || 0);
 params.pauseSignFrameRate = Number(parameters["pauseSignFrameRate"] || 3.75);
+params.pauseSignOffsetX = Number(parameters["pauseSignOffsetX"] || 0);
+params.pauseSignOffsetY = Number(parameters["pauseSignOffsetY"] || 0);
 params._pauseSignBitmap = null;
 params._pauseSignSize = 24;
 params._pauseSignSpriteCol = 5;
@@ -75,13 +104,9 @@ Window_Message.prototype.loadWindowskin = function () {
   params._pauseSignBitmap = ImageManager.loadSystem(params.pauseSignImage);
   params._pauseSignBitmap.addLoadListener((bitmap) => {
     // auto calculate params
-    params._pauseSignSize = Math.floor(
-      bitmap.width / params._pauseSignSpriteCol
-    );
+    params._pauseSignSize = Math.floor(bitmap.width / params._pauseSignSpriteCol);
     if (params.pauseSignNum <= 0) {
-      const pauseSignSpriteRow = Math.ceil(
-        bitmap.height / params._pauseSignSize
-      );
+      const pauseSignSpriteRow = Math.ceil(bitmap.height / params._pauseSignSize);
       params.pauseSignNum = pauseSignSpriteRow * params._pauseSignSpriteCol;
     }
   });
@@ -94,20 +119,19 @@ Window_Message.prototype._refreshPauseSign = function () {
   this._windowPauseSignSprite.bitmap = params._pauseSignBitmap;
   this._windowPauseSignSprite.anchor.x = 0.5;
   this._windowPauseSignSprite.anchor.y = 1;
-  this._windowPauseSignSprite.move(this._width / 2, this._height);
+  this._windowPauseSignSprite.move(
+    this._width / 2 + params.pauseSignOffsetX,
+    this._height + params.pauseSignOffsetY
+  );
   this._windowPauseSignSprite.setFrame(sx, sy, p, p);
   this._windowPauseSignSprite.alpha = 0;
 };
 
 Window_Message.prototype._updatePauseSign = function () {
   const sprite = this._windowPauseSignSprite;
-  const count = Math.floor(
-    (this._animationCount * params.pauseSignFrameRate) / 60
-  );
+  const count = Math.floor((this._animationCount * params.pauseSignFrameRate) / 60);
   const x = (count % params.pauseSignNum) % params._pauseSignSpriteCol;
-  const y = Math.floor(
-    (count % params.pauseSignNum) / params._pauseSignSpriteCol
-  );
+  const y = Math.floor((count % params.pauseSignNum) / params._pauseSignSpriteCol);
   const sx = 0;
   const sy = 0;
   const p = params._pauseSignSize;
