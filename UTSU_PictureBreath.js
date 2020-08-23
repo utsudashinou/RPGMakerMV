@@ -6,6 +6,8 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.0 2020/08/23 Fix plugin does not work in a battle
+//                  Fix help about parameters, speed -> period
 // 1.0.0 2020/08/21 Release
 // ----------------------------------------------------------------------------
 // [GitHub] : https://github.com/utsudashinou
@@ -19,9 +21,8 @@
  * @help ピクチャに息遣いの動作を加えます。
  *
  * * スクリプト
- * UTSU.PictureBreath.on(pictureIds, speed);
- *   息遣いをする。pictureIdsは対象のピクチャIDの配列、speedは息遣いの速さ。
- *   speedは小さいほど遅い。
+ * UTSU.PictureBreath.on(pictureIds, period);
+ *   息遣いをする。pictureIdsは対象のピクチャIDの配列、periodは息遣いの周期。
  *   例: UTSU.PictureBreath.on([1,2,3]), 150);
  *
  * UTSU.PictureBreath.off(pictureIds);
@@ -30,9 +31,8 @@
  *
  *
  * * プラグインコマンド
- * UTSU_PictureBreathOn pictureId0, ...pictureIdN, speed
- *   息遣いをする。pictureId*は対象のピクチャID、speedは息遣いの速さ。
- *   speedは小さいほど遅い。
+ * UTSU_PictureBreathOn pictureId0, ...pictureIdN, period
+ *   息遣いをする。pictureId*は対象のピクチャID、periodは息遣いの周期。
  *   例: UTSU_PictureBreathOn 1 2 3 4 5 150
  *
  * UTSU_PictureBreathOff pictureId0, ...pictureIdN
@@ -45,23 +45,26 @@ this.UTSU = this.UTSU || {};
 this.UTSU.PictureBreath = this.UTSU.PictureBreath || {};
 
 (function () {
+  const STATE_NO_OPERATION = -1;
+  const STATE_REQUEST_DEACTIVATE = 0;
+  const STATE_REQUEST_ACTIVATE = 1;
   UTSU.PictureBreath.on = function (pids, speed) {
-    for (let pid of pids) {
-      const picture = $gameScreen.picture(pid);
+    pids.forEach((pid) => {
+      const picture = $gameScreen.picture(Number(pid));
       if (picture) {
-        picture._breath = "on";
-        picture._breathSpeed = Number(speed);
+        picture._breathState = STATE_REQUEST_ACTIVATE;
+        picture._breathPeriod = Number(speed);
       }
-    }
+    });
   };
 
   UTSU.PictureBreath.off = function (pids) {
-    for (let pid of pids) {
-      const picture = $gameScreen.picture(pid);
+    pids.forEach((pid) => {
+      const picture = $gameScreen.picture(Number(pid));
       if (picture) {
-        picture._breath = "off";
+        picture._breathState = STATE_REQUEST_DEACTIVATE;
       }
-    }
+    });
   };
 
   const _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
@@ -79,48 +82,37 @@ this.UTSU.PictureBreath = this.UTSU.PictureBreath || {};
   const _Game_Picture_initBasic = Game_Picture.prototype.initBasic;
   Game_Picture.prototype.initBasic = function () {
     _Game_Picture_initBasic.call(this);
-    this._breath = null;
-    this._breathSpeed = 0;
-  };
-
-  const _Sprite_Picture_initialize = Sprite_Picture.prototype.initialize;
-  Sprite_Picture.prototype.initialize = function (pictureId) {
-    _Sprite_Picture_initialize.call(this, pictureId);
-    this._zoomMax = null;
-    this._zoomCount = null;
-    this._breath = false;
+    this._breathState = STATE_NO_OPERATION;
+    this._breathPeriod = 0;
+    this._breathCount = 0;
+    this._breathActive = true;
   };
 
   const _Sprite_Picture_update = Sprite_Picture.prototype.update;
   Sprite_Picture.prototype.update = function () {
     _Sprite_Picture_update.call(this);
     if (this.visible) {
-      this._breathCheck();
       this._breathUpdate();
     }
   };
 
-  Sprite_Picture.prototype._breathCheck = function () {
+  Sprite_Picture.prototype._breathUpdate = function () {
     const picture = this.picture();
     if (!picture) {
       return;
     }
-    if (picture._breath === "on") {
-      this._zoomMax = picture._breathSpeed;
-      this._zoomCount = 0;
-      picture._breath = null;
-      this._breath = true;
+    if (picture._breathState === STATE_REQUEST_ACTIVATE) {
+      picture._breathCount = 0;
+      picture._breathState = STATE_NO_OPERATION;
+      picture._breathActive = true;
     }
-    if (picture._breath === "off") {
-      picture._breath = null;
-      this._breath = false;
+    if (picture._breathState === STATE_REQUEST_DEACTIVATE) {
+      picture._breathState = STATE_NO_OPERATION;
+      picture._breathActive = false;
     }
-  };
-
-  Sprite_Picture.prototype._breathUpdate = function () {
-    if (this._breath) {
-      this._zoomCount = (this._zoomCount + 1) % this._zoomMax;
-      const freq = Math.sin((Math.PI * this._zoomCount) / (this._zoomMax / 2));
+    if (picture._breathActive) {
+      picture._breathCount = (picture._breathCount + 1) % picture._breathPeriod;
+      const freq = Math.sin((Math.PI * picture._breathCount) / (picture._breathPeriod / 2));
       this.scale.y -= freq * 0.015 + 0.015;
       this.y -= Math.ceil((this.height * (1.0 - this.scale.y)) / 2);
       this.scale.x += freq * 0.005 + 0.005;
