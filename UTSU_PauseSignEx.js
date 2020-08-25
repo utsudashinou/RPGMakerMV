@@ -6,6 +6,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.3 2020/08/25 Fix compatibility issue of NobleMushroom.js
 // 1.1.2 2020/08/25 Refactoring
 // 1.1.1 2020/08/25 Fix compatibility issue of PauseSignToTextEnd.js
 // 1.1.0 2020/08/23 Add X/Y offset option
@@ -126,9 +127,7 @@
     this._setPauseSignSpriteOffset(this._windowPauseSignSprite);
   };
 
-  const _Window_Message__updatePauseSign = Window.prototype._updatePauseSign;
-  Window.prototype._updatePauseSign = function () {
-    _Window_Message__updatePauseSign.call(this);
+  Window.prototype.__updatePauseSignEx = function () {
     const sprite = this._windowPauseSignSprite;
     const count = Math.floor((this._animationCount * params.pauseSignFrameRate) / 60);
     const x = (count % params.pauseSignNum) % params._pauseSignSpriteCol;
@@ -137,6 +136,12 @@
     const sy = 0;
     const p = params._pauseSignSize;
     sprite.setFrame(sx + x * p, sy + y * p, p, p);
+  };
+
+  const _Window_Message__updatePauseSign = Window.prototype._updatePauseSign;
+  Window.prototype._updatePauseSign = function () {
+    _Window_Message__updatePauseSign.call(this);
+    this.__updatePauseSignEx();
   };
 
   Window.prototype._setPauseSignSpriteOffset = function (position) {
@@ -151,6 +156,23 @@
     Window_Message.prototype.setPauseSignToTextEnd = function () {
       _Window_Message_setPauseSignToTextEnd.call(this);
       this._setPauseSignSpriteOffset(this._windowPauseSignSprite);
+    };
+  }
+
+  // NobleMushroom Compatible
+  if (Object.keys(PluginManager._parameters).contains("noblemushroom")) {
+    // bad part...
+    const _Window_Message_startPause = Window_Message.prototype.startPause;
+    Window_Message.prototype.startPause = function () {
+      if ("setPauseSignSpritePosition" in this && !this.__injected_NobleMushroom) {
+        this.__injected_NobleMushroom = true;
+        const _Window_NovelMessage_setPauseSignSpritePosition = this.setPauseSignSpritePosition;
+        this.setPauseSignSpritePosition = function (position) {
+          _Window_NovelMessage_setPauseSignSpritePosition.call(this, position);
+          this._setPauseSignSpriteOffset(position);
+        };
+      }
+      _Window_Message_startPause.call(this);
     };
   }
 })();
