@@ -6,6 +6,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.2 2020/08/25 Fix to continue picture breath even if picture changed for the same picture number
 // 1.1.1 2020/08/25 Fix bug about init params
 // 1.1.0 2020/08/23 Fix plugin does not work in a battle
 //                  Fix help about parameters, speed -> period
@@ -49,6 +50,7 @@
   const STATE_NO_OPERATION = -1;
   const STATE_REQUEST_DEACTIVATE = 0;
   const STATE_REQUEST_ACTIVATE = 1;
+
   global.UTSU.PictureBreath.on = (pids, period) => {
     pids.forEach((pid) => {
       const picture = $gameScreen.picture(Number(pid));
@@ -85,35 +87,42 @@
     _Game_Picture_initBasic.call(this);
     this._breathState = STATE_NO_OPERATION;
     this._breathPeriod = 0;
-    this._breathCount = 0;
-    this._breathActive = false;
   };
 
   const _Sprite_Picture_update = Sprite_Picture.prototype.update;
   Sprite_Picture.prototype.update = function () {
     _Sprite_Picture_update.call(this);
     if (this.visible) {
+      this._breathCheck();
       this._breathUpdate();
     }
   };
 
-  Sprite_Picture.prototype._breathUpdate = function () {
+  Sprite_Picture.prototype._breathCheck = function () {
     const picture = this.picture();
     if (!picture) {
       return;
     }
+    // if (this._breathPeriod === picture._breathPeriod) {
+    //   picture._breathState = STATE_REQUEST_ACTIVATE;
+    // }
     if (picture._breathState === STATE_REQUEST_ACTIVATE) {
-      picture._breathCount = 0;
       picture._breathState = STATE_NO_OPERATION;
-      picture._breathActive = true;
+      this._breathActive = true;
+      this._breathPeriod = picture._breathPeriod;
+      this._breathCount = 0;
     }
     if (picture._breathState === STATE_REQUEST_DEACTIVATE) {
       picture._breathState = STATE_NO_OPERATION;
-      picture._breathActive = false;
+      this._breathActive = false;
+      this._breathPeriod = 0;
     }
-    if (picture._breathActive) {
-      picture._breathCount = (picture._breathCount + 1) % picture._breathPeriod;
-      const freq = Math.sin((Math.PI * picture._breathCount) / (picture._breathPeriod / 2));
+  };
+
+  Sprite_Picture.prototype._breathUpdate = function () {
+    if (this._breathActive) {
+      this._breathCount = (this._breathCount + 1) % this._breathPeriod;
+      const freq = Math.sin((Math.PI * this._breathCount) / (this._breathPeriod / 2));
       this.scale.y -= freq * 0.015 + 0.015;
       this.y -= Math.ceil((this.height * (1.0 - this.scale.y)) / 2);
       this.scale.x += freq * 0.005 + 0.005;
