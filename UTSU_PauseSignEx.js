@@ -6,6 +6,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.2 2020/08/25 Refactoring
 // 1.1.1 2020/08/25 Fix compatibility issue of PauseSignToTextEnd.js
 // 1.1.0 2020/08/23 Add X/Y offset option
 // 1.0.0 2020/08/21 Release
@@ -88,66 +89,68 @@
  *
  */
 
-const parameters = PluginManager.parameters("UTSU_PauseSignEx");
-const params = {};
-params.pauseSignImage = parameters["pauseSignImage"] || "pauseSign";
-params.pauseSignNum = Number(parameters["pauseSignNum"] || 0);
-params.pauseSignFrameRate = Number(parameters["pauseSignFrameRate"] || 3.75);
-params.pauseSignOffsetX = Number(parameters["pauseSignOffsetX"] || 0);
-params.pauseSignOffsetY = Number(parameters["pauseSignOffsetY"] || 0);
-params._pauseSignBitmap = null;
-params._pauseSignSize = 24;
-params._pauseSignSpriteCol = 5;
+(() => {
+  const parameters = PluginManager.parameters("UTSU_PauseSignEx");
+  const params = {};
+  params.pauseSignImage = parameters["pauseSignImage"] || "pauseSign";
+  params.pauseSignNum = Number(parameters["pauseSignNum"] || 0);
+  params.pauseSignFrameRate = Number(parameters["pauseSignFrameRate"] || 3.75);
+  params.pauseSignOffsetX = Number(parameters["pauseSignOffsetX"] || 0);
+  params.pauseSignOffsetY = Number(parameters["pauseSignOffsetY"] || 0);
+  params._pauseSignBitmap = null;
+  params._pauseSignSize = 24;
+  params._pauseSignSpriteCol = 5;
 
-const _Window_Base_loadWindowskin = Window_Base.prototype.loadWindowskin;
-Window_Base.prototype.loadWindowskin = function () {
-  _Window_Base_loadWindowskin.call(this);
-  params._pauseSignBitmap = ImageManager.loadSystem(params.pauseSignImage);
-  params._pauseSignBitmap.addLoadListener((bitmap) => {
-    // auto calculate params
-    params._pauseSignSize = Math.floor(bitmap.width / params._pauseSignSpriteCol);
-    if (params.pauseSignNum <= 0) {
-      const pauseSignSpriteRow = Math.ceil(bitmap.height / params._pauseSignSize);
-      params.pauseSignNum = pauseSignSpriteRow * params._pauseSignSpriteCol;
-    }
-  });
-};
+  const _Window_Base_loadWindowskin = Window_Base.prototype.loadWindowskin;
+  Window_Base.prototype.loadWindowskin = function () {
+    _Window_Base_loadWindowskin.call(this);
+    params._pauseSignBitmap = ImageManager.loadSystem(params.pauseSignImage);
+    params._pauseSignBitmap.addLoadListener((bitmap) => {
+      // auto calculate params
+      params._pauseSignSize = Math.floor(bitmap.width / params._pauseSignSpriteCol);
+      if (params.pauseSignNum <= 0) {
+        const pauseSignSpriteRow = Math.ceil(bitmap.height / params._pauseSignSize);
+        params.pauseSignNum = pauseSignSpriteRow * params._pauseSignSpriteCol;
+      }
+    });
+  };
 
-const _Window__refreshPauseSign = Window.prototype._refreshPauseSign;
-Window.prototype._refreshPauseSign = function () {
-  _Window__refreshPauseSign.call(this);
-  const sx = 0;
-  const sy = 0;
-  const p = params._pauseSignSize;
-  this._windowPauseSignSprite.bitmap = params._pauseSignBitmap;
-  this._windowPauseSignSprite.setFrame(sx, sy, p, p);
-  this._setPauseSignSpriteOffset(this._windowPauseSignSprite);
-};
-
-const _Window_Message__updatePauseSign = Window.prototype._updatePauseSign;
-Window.prototype._updatePauseSign = function () {
-  _Window_Message__updatePauseSign.call(this);
-  const sprite = this._windowPauseSignSprite;
-  const count = Math.floor((this._animationCount * params.pauseSignFrameRate) / 60);
-  const x = (count % params.pauseSignNum) % params._pauseSignSpriteCol;
-  const y = Math.floor((count % params.pauseSignNum) / params._pauseSignSpriteCol);
-  const sx = 0;
-  const sy = 0;
-  const p = params._pauseSignSize;
-  sprite.setFrame(sx + x * p, sy + y * p, p, p);
-};
-
-Window.prototype._setPauseSignSpriteOffset = function (position) {
-  const sprite = this._windowPauseSignSprite;
-  sprite.x = position.x + params.pauseSignOffsetX;
-  sprite.y = position.y + params.pauseSignOffsetY;
-};
-
-// PauseSignToTextEnd Compatible
-if (Window_Message.prototype.hasOwnProperty("setPauseSignToTextEnd")) {
-  const _Window_Message_setPauseSignToTextEnd = Window_Message.prototype.setPauseSignToTextEnd;
-  Window_Message.prototype.setPauseSignToTextEnd = function () {
-    _Window_Message_setPauseSignToTextEnd.call(this);
+  const _Window__refreshPauseSign = Window.prototype._refreshPauseSign;
+  Window.prototype._refreshPauseSign = function () {
+    _Window__refreshPauseSign.call(this);
+    const sx = 0;
+    const sy = 0;
+    const p = params._pauseSignSize;
+    this._windowPauseSignSprite.bitmap = params._pauseSignBitmap;
+    this._windowPauseSignSprite.setFrame(sx, sy, p, p);
     this._setPauseSignSpriteOffset(this._windowPauseSignSprite);
   };
-}
+
+  const _Window_Message__updatePauseSign = Window.prototype._updatePauseSign;
+  Window.prototype._updatePauseSign = function () {
+    _Window_Message__updatePauseSign.call(this);
+    const sprite = this._windowPauseSignSprite;
+    const count = Math.floor((this._animationCount * params.pauseSignFrameRate) / 60);
+    const x = (count % params.pauseSignNum) % params._pauseSignSpriteCol;
+    const y = Math.floor((count % params.pauseSignNum) / params._pauseSignSpriteCol);
+    const sx = 0;
+    const sy = 0;
+    const p = params._pauseSignSize;
+    sprite.setFrame(sx + x * p, sy + y * p, p, p);
+  };
+
+  Window.prototype._setPauseSignSpriteOffset = function (position) {
+    const sprite = this._windowPauseSignSprite;
+    sprite.x = position.x + params.pauseSignOffsetX;
+    sprite.y = position.y + params.pauseSignOffsetY;
+  };
+
+  // PauseSignToTextEnd Compatible
+  if (Window_Message.prototype.hasOwnProperty("setPauseSignToTextEnd")) {
+    const _Window_Message_setPauseSignToTextEnd = Window_Message.prototype.setPauseSignToTextEnd;
+    Window_Message.prototype.setPauseSignToTextEnd = function () {
+      _Window_Message_setPauseSignToTextEnd.call(this);
+      this._setPauseSignSpriteOffset(this._windowPauseSignSprite);
+    };
+  }
+})();
