@@ -6,6 +6,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.1 2020/08/25 Fix bug about init params
 // 1.1.0 2020/08/23 Fix plugin does not work in a battle
 //                  Fix help about parameters, speed -> period
 // 1.0.0 2020/08/21 Release
@@ -41,24 +42,24 @@
  *
  */
 
-this.UTSU = this.UTSU || {};
-this.UTSU.PictureBreath = this.UTSU.PictureBreath || {};
+((global) => {
+  global.UTSU = global.UTSU || {};
+  global.UTSU.PictureBreath = global.UTSU.PictureBreath || {};
 
-(function () {
   const STATE_NO_OPERATION = -1;
   const STATE_REQUEST_DEACTIVATE = 0;
   const STATE_REQUEST_ACTIVATE = 1;
-  UTSU.PictureBreath.on = function (pids, speed) {
+  global.UTSU.PictureBreath.on = (pids, period) => {
     pids.forEach((pid) => {
       const picture = $gameScreen.picture(Number(pid));
       if (picture) {
         picture._breathState = STATE_REQUEST_ACTIVATE;
-        picture._breathPeriod = Number(speed);
+        picture._breathPeriod = Number(period);
       }
     });
   };
 
-  UTSU.PictureBreath.off = function (pids) {
+  global.UTSU.PictureBreath.off = (pids) => {
     pids.forEach((pid) => {
       const picture = $gameScreen.picture(Number(pid));
       if (picture) {
@@ -71,8 +72,8 @@ this.UTSU.PictureBreath = this.UTSU.PictureBreath || {};
   Game_Interpreter.prototype.pluginCommand = function (command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
     if (command === "UTSU_PictureBreathOn") {
-      const speed = args.pop();
-      UTSU.PictureBreath.on(args, speed);
+      const period = args.pop();
+      UTSU.PictureBreath.on(args, period);
     }
     if (command === "UTSU_PictureBreathOff") {
       UTSU.PictureBreath.off(args);
@@ -85,7 +86,7 @@ this.UTSU.PictureBreath = this.UTSU.PictureBreath || {};
     this._breathState = STATE_NO_OPERATION;
     this._breathPeriod = 0;
     this._breathCount = 0;
-    this._breathActive = true;
+    this._breathActive = false;
   };
 
   const _Sprite_Picture_update = Sprite_Picture.prototype.update;
@@ -119,4 +120,4 @@ this.UTSU.PictureBreath = this.UTSU.PictureBreath || {};
       this.x += Math.ceil(this.width * (1.0 - this.scale.x));
     }
   };
-})();
+})(window);
