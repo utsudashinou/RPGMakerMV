@@ -6,6 +6,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.2.0 2020/08/28 Add support RPG Maker MZ
 // 1.1.4 2020/08/28 Refactoring compatibility code
 // 1.1.3 2020/08/25 Fix compatibility issue of NobleMushroom.js
 // 1.1.2 2020/08/25 Refactoring
@@ -18,8 +19,10 @@
 //=============================================================================
 
 /*:
+ * @target MV MZ
  * @plugindesc ポーズサイン拡張
  * @author Utsuda Shinou
+ * @url https://github.com/utsudashinou/RPGMakerMV
  *
  * @help ポーズサインの表示を調節します。
  *
@@ -123,13 +126,14 @@
     const sx = 0;
     const sy = 0;
     const p = params._pauseSignSize;
-    this._windowPauseSignSprite.bitmap = params._pauseSignBitmap;
-    this._windowPauseSignSprite.setFrame(sx, sy, p, p);
-    this._setPauseSignSpriteOffset(this._windowPauseSignSprite);
+    const sprite = this._pauseSignSprite || this._windowPauseSignSprite;
+    sprite.bitmap = params._pauseSignBitmap;
+    sprite.setFrame(sx, sy, p, p);
+    this._setPauseSignSpriteOffset(sprite);
   };
 
   Window.prototype.__updatePauseSignEx = function () {
-    const sprite = this._windowPauseSignSprite;
+    const sprite = this._pauseSignSprite || this._windowPauseSignSprite;
     const count = Math.floor((this._animationCount * params.pauseSignFrameRate) / 60);
     const x = (count % params.pauseSignNum) % params._pauseSignSpriteCol;
     const y = Math.floor((count % params.pauseSignNum) / params._pauseSignSpriteCol);
@@ -146,7 +150,7 @@
   };
 
   Window.prototype._setPauseSignSpriteOffset = function (position) {
-    const sprite = this._windowPauseSignSprite;
+    const sprite = this._pauseSignSprite || this._windowPauseSignSprite;
     sprite.x = position.x + params.pauseSignOffsetX;
     sprite.y = position.y + params.pauseSignOffsetY;
   };
@@ -156,7 +160,8 @@
     const _Window_Message_setPauseSignToTextEnd = Window_Message.prototype.setPauseSignToTextEnd;
     Window_Message.prototype.setPauseSignToTextEnd = function () {
       _Window_Message_setPauseSignToTextEnd.call(this);
-      this._setPauseSignSpriteOffset(this._windowPauseSignSprite);
+      const sprite = this._pauseSignSprite || this._windowPauseSignSprite;
+      this._setPauseSignSpriteOffset(sprite);
     };
   }
 
