@@ -6,6 +6,7 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.4 2020/08/28 Refactoring compatibility code
 // 1.1.3 2020/08/25 Fix compatibility issue of NobleMushroom.js
 // 1.1.2 2020/08/25 Refactoring
 // 1.1.1 2020/08/25 Fix compatibility issue of PauseSignToTextEnd.js
@@ -150,8 +151,8 @@
     sprite.y = position.y + params.pauseSignOffsetY;
   };
 
-  // PauseSignToTextEnd Compatible
-  if (Window_Message.prototype.hasOwnProperty("setPauseSignToTextEnd")) {
+  // PauseSignToTextEnd.js Compatible
+  if (PluginManager._scripts.contains("PauseSignToTextEnd")) {
     const _Window_Message_setPauseSignToTextEnd = Window_Message.prototype.setPauseSignToTextEnd;
     Window_Message.prototype.setPauseSignToTextEnd = function () {
       _Window_Message_setPauseSignToTextEnd.call(this);
@@ -159,8 +160,8 @@
     };
   }
 
-  // NobleMushroom Compatible
-  if (Object.keys(PluginManager._parameters).contains("noblemushroom")) {
+  // NobleMushroom.js Compatible
+  if (PluginManager._scripts.contains("NobleMushroom")) {
     // bad part...
     const _Window_Message_startPause = Window_Message.prototype.startPause;
     Window_Message.prototype.startPause = function () {
