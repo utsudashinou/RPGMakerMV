@@ -1,9 +1,13 @@
 //=============================================================================
-// KRST_SPARKLE_OF_LIFE.js
+// KRST_SPARKLE_OF_LIFE_MZ.js
 // ----------------------------------------------------------------------------
 // Copyright (c) 2020 Velfare Nagata
 // This plugin is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
+//
+// 1.0.0 2020/08/29 Add support RPG Maker MZ
+//
+// --- Fork from KRST_SPARKLE_OF_LIFE.js ----
 //
 // 1.0.1 2020/08/29 add line width margin to sprite
 // 1.0.0 2020/08/26 first edition
@@ -17,6 +21,7 @@
 //     [Twitter]: https://twitter.com/virtualUtsuda
 
 /*:ja
+ * @target MZ
  * @plugindesc いのちの輝きをゲームに与えます。
  *
  * @help プラグインコマンドを用いていのちの輝きをゲームに与えます。
@@ -40,6 +45,66 @@
  * KRST_HIDE
  *
  * @author ベルファーレ長田（゜∀゜）◆AHYA/lPiZ.?, Utsuda Shinou
+ *
+ * @command KRST_SHOW_BODY
+ * @text 体を配置
+ * @desc いのちの輝きの体を配置する
+ *
+ * @arg X
+ * @text X
+ * @desc いのちの輝きのX座標
+ * @type number
+ * @default 0
+ *
+ * @arg Y
+ * @text Y
+ * @desc いのちの輝きのY座標
+ * @type number
+ * @default 0
+ *
+ * @arg Width
+ * @text 横幅
+ * @desc いのちの輝きの横幅
+ * @type number
+ * @default 0
+ *
+ * @arg Height
+ * @text 縦幅
+ * @desc いのちの輝きの縦幅
+ * @type number
+ * @default 0
+ *
+ * @command KRST_SHOW_EYE
+ * @text 目玉を配置
+ * @desc いのちの輝きの目玉を配置する
+ *
+ * @arg X
+ * @text X
+ * @desc いのちの輝きのX座標
+ * @type number
+ * @default 0
+ *
+ * @arg Y
+ * @text Y
+ * @desc いのちの輝きのY座標
+ * @type number
+ * @default 0
+ *
+ * @arg Width
+ * @text 横幅
+ * @desc いのちの輝きの横幅
+ * @type number
+ * @default 0
+ *
+ * @arg Height
+ * @text 縦幅
+ * @desc いのちの輝きの縦幅
+ * @type number
+ * @default 0
+ *
+ * @command KRST_HIDE
+ * @text 消す
+ * @desc いのちの輝きを消す
  *
  * @param bodyColor
  * @desc いのちの輝きの体部分の色を指定します。
@@ -114,6 +179,7 @@
  *
  */
 /*:
+ * @target MZ
  * @plugindesc Give your game sparkle of life.
  *
  * @help Give your game sparkle of life using plugin commands.
@@ -137,6 +203,66 @@
  * KRST_HIDE
  *
  * @author Velfare Nagata, Utsuda Shinou
+ *
+ * @command KRST_SHOW_BODY
+ * @text Show Body
+ * @desc Put body of sparkle of life.
+ *
+ * @arg X
+ * @text X
+ * @desc X coordinate of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @arg Y
+ * @text Y
+ * @desc Y coordinate of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @arg Width
+ * @text Width
+ * @desc Width of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @arg Height
+ * @text Height
+ * @desc Height of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @command KRST_SHOW_EYE
+ * @text Show Eye
+ * @desc Put eye of sparkle of life.
+ *
+ * @arg X
+ * @text X
+ * @desc X coordinate of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @arg Y
+ * @text Y
+ * @desc Y coordinate of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @arg Width
+ * @text Width
+ * @desc Width of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @arg Height
+ * @text Height
+ * @desc Height of sparkle of life.
+ * @type number
+ * @default 0
+ *
+ * @command KRST_HIDE
+ * @text Hide
+ * @desc Hide sparkle of life.
  *
  * @param bodyColor
  * @desc Specifies the color of body of sparkle of life.
@@ -213,7 +339,7 @@
 
 (function () {
   "use strict";
-  var pluginName = "KRST_SPARKLE_OF_LIFE";
+  var pluginName = "KRST_SPARKLE_OF_LIFE_MZ";
 
   // Thanks：トリアコンタン殿
   var getArgString = function (arg) {
@@ -258,33 +384,31 @@
   // --------------------------------------------------
   // プラグインコマンド追加
   // --------------------------------------------------
-  let _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-  Game_Interpreter.prototype.pluginCommand = function (command, args) {
-    _Game_Interpreter_pluginCommand.apply(this, arguments);
-    let commandName = command.toUpperCase();
 
-    switch (commandName) {
-      case "KRST_SHOW_BODY":
-        var x = args.length >= 1 ? getArgNumber(args[0], -9999, 9999) : 0;
-        var y = args.length >= 2 ? getArgNumber(args[1], -9999, 9999) : 0;
-        var w = args.length >= 3 ? getArgNumber(args[2], -9999, 9999) : 0;
-        var h = args.length >= 4 ? getArgNumber(args[3], -9999, 9999) : 0;
-        $gameTemp._lifeContainer.addChild(new Sprite_Body(x, y, w, h));
-        break;
-      case "KRST_SHOW_EYE":
-        var x = args.length >= 1 ? getArgNumber(args[0], -9999, 9999) : 0;
-        var y = args.length >= 2 ? getArgNumber(args[1], -9999, 9999) : 0;
-        var w = args.length >= 3 ? getArgNumber(args[2], -9999, 9999) : 0;
-        var h = args.length >= 4 ? getArgNumber(args[3], -9999, 9999) : 0;
-        $gameTemp._lifeContainer.addChild(new Sprite_Eye(x, y, w, h));
-        break;
-      case "KRST_HIDE":
-        while ($gameTemp._lifeContainer.children.length > 0) {
-          $gameTemp._lifeContainer.removeChildAt(0);
-        }
-        break;
+  PluginManager.registerCommand(pluginName, "KRST_SHOW_BODY", (args) => {
+    var x = args["X"] ? getArgNumber(args["X"], -9999, 9999) : 0;
+    var y = args["Y"] ? getArgNumber(args["Y"], -9999, 9999) : 0;
+    var w = args["Width"] ? getArgNumber(args["Width"], -9999, 9999) : 0;
+    var h = args["Height"] ? getArgNumber(args["Height"], -9999, 9999) : 0;
+    const sprite = new Sprite_Body(x, y, w, h);
+    $gameTemp._lifeContainer.addChild(sprite);
+    $gameTemp._lifeEntities.push({ type: "body", x, y, w, h });
+  });
+  PluginManager.registerCommand(pluginName, "KRST_SHOW_EYE", (args) => {
+    var x = args["X"] ? getArgNumber(args["X"], -9999, 9999) : 0;
+    var y = args["Y"] ? getArgNumber(args["Y"], -9999, 9999) : 0;
+    var w = args["Width"] ? getArgNumber(args["Width"], -9999, 9999) : 0;
+    var h = args["Height"] ? getArgNumber(args["Height"], -9999, 9999) : 0;
+    const sprite = new Sprite_Eye(x, y, w, h);
+    $gameTemp._lifeContainer.addChild(sprite);
+    $gameTemp._lifeEntities.push({ type: "eye", x, y, w, h });
+  });
+  PluginManager.registerCommand(pluginName, "KRST_HIDE", (args) => {
+    while ($gameTemp._lifeContainer.children.length > 0) {
+      $gameTemp._lifeContainer.removeChildAt(0);
+      $gameTemp._lifeEntities.shift(0);
     }
-  };
+  });
 
   class Sprite_Sparkle_Of_Life extends Sprite {
     constructor(x, y, w, h) {
@@ -641,7 +765,7 @@
   Game_Temp.prototype.initialize = function () {
     _Game_Temp_initialize.apply(this, arguments);
     this._lifeContainer = new Sprite();
-    this._lifeContainer.setFrame(0, 0, Graphics.width, Graphics.height);
+    this._lifeEntities = [];
   };
 
   // ---
@@ -651,8 +775,17 @@
   var _Spriteset_Base_createUpperLayer = Spriteset_Base.prototype.createUpperLayer;
   Spriteset_Base.prototype.createUpperLayer = function () {
     _Spriteset_Base_createUpperLayer.apply(this, arguments);
-    if ($gameTemp._lifeContainer) {
-      this.addChild($gameTemp._lifeContainer);
-    }
+    const lifeContainer = new Sprite();
+    $gameTemp._lifeContainer = lifeContainer;
+    lifeContainer.setFrame(0, 0, Graphics.width, Graphics.height);
+    $gameTemp._lifeEntities.forEach((life) => {
+      if (life.type === "body") {
+        lifeContainer.addChild(new Sprite_Body(life.x, life.y, life.w, life.h));
+      }
+      if (life.type === "eye") {
+        lifeContainer.addChild(new Sprite_Eye(life.x, life.y, life.w, life.h));
+      }
+    });
+    this.addChild(lifeContainer);
   };
 })();
