@@ -5,10 +5,16 @@
 // This plugin is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
 //
+// 1.0.1 2020/08/29 add line width margin to sprite
 // 1.0.0 2020/08/26 first edition
 // ----------------------------------------------------------------------------
 // [Twitter]: https://twitter.com/velfare_nagata/
 //=============================================================================
+//
+// * Contributors
+//   Utsuda Shinou
+//     [GitHub] : https://github.com/utsudashinou
+//     [Twitter]: https://twitter.com/virtualUtsuda
 
 /*:ja
  * @plugindesc いのちの輝きをゲームに与えます。
@@ -33,7 +39,7 @@
  * 3. いのちの輝きを消す場合
  * KRST_HIDE
  *
- * @author ベルファーレ長田（゜∀゜）◆AHYA/lPiZ.?
+ * @author ベルファーレ長田（゜∀゜）◆AHYA/lPiZ.?, Utsuda Shinou
  *
  * @param bodyColor
  * @desc いのちの輝きの体部分の色を指定します。
@@ -130,7 +136,7 @@
  * 3. In the case of hide sparkle of life.
  * KRST_HIDE
  *
- * @author Velfare Nagata
+ * @author Velfare Nagata, Utsuda Shinou
  *
  * @param bodyColor
  * @desc Specifies the color of body of sparkle of life.
@@ -330,17 +336,20 @@
     }
 
     drawTo(ctx) {
-      let bmp = this.bitmap;
-      let halfWidth = bmp.width / 2;
-      let halfHeight = bmp.height / 2;
+      const bmp = this.bitmap;
+      const lineWidth = 2;
+      const halfWidth = bmp.width / 2;
+      const halfHeight = bmp.height / 2;
+      const radiusX = halfWidth > lineWidth ? halfWidth - lineWidth : 0;
+      const radiusY = halfHeight > lineWidth ? halfHeight - lineWidth : 0;
       const radianStart = 0 * (Math.PI / 180);
       const radianEnd = 360 * (Math.PI / 180);
       ctx.beginPath();
-      ctx.ellipse(halfWidth, halfHeight, halfWidth, halfHeight, 0, radianStart, radianEnd);
+      ctx.ellipse(halfWidth, halfHeight, radiusX, radiusY, 0, radianStart, radianEnd);
       ctx.closePath();
       ctx.fillStyle = this.color;
       ctx.fill();
-      ctx.lineWidth = 2;
+      ctx.lineWidth = lineWidth;
       ctx.globalCompositeOperation = "source-over";
       ctx.stroke();
     }
@@ -426,17 +435,20 @@
     }
 
     drawTo(ctx) {
-      let bmp = this.bitmap;
-      let halfWidth = bmp.width / 2;
-      let halfHeight = bmp.height / 2;
+      const bmp = this.bitmap;
+      const lineWidth = 2;
+      const halfWidth = bmp.width / 2;
+      const halfHeight = bmp.height / 2;
+      const radiusX = halfWidth > lineWidth ? halfWidth - lineWidth : 0;
+      const radiusY = halfHeight > lineWidth ? halfHeight - lineWidth : 0;
       const radianStart = 0 * (Math.PI / 180);
       const radianEnd = 360 * (Math.PI / 180);
       ctx.beginPath();
-      ctx.ellipse(halfWidth, halfHeight, halfWidth, halfHeight, 0, radianStart, radianEnd);
+      ctx.ellipse(halfWidth, halfHeight, radiusX, radiusY, 0, radianStart, radianEnd);
       ctx.closePath();
       ctx.fillStyle = this.color;
       ctx.fill();
-      ctx.lineWidth = 2;
+      ctx.lineWidth = lineWidth;
       ctx.globalCompositeOperation = "source-over";
       ctx.stroke();
     }
