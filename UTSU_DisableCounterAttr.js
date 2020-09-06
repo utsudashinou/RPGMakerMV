@@ -6,18 +6,23 @@
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.1.0 2020/09/06 Simplify and Add support RPG Maker MZ
 // 1.0.0 2020/02/29 Release
 // ----------------------------------------------------------------------------
 // [GitHub] : https://github.com/utsudashinou
+// [Twitter]: https://twitter.com/virtualUtsuda
 //=============================================================================
 
 /*:
+ * @target MV MZ
  * @plugindesc カウンター属性の挙動を無効にします
- * @author Utsuda
+ * @author Utsuda Shinou
+ * @url https://github.com/utsudashinou/RPGMakerMV
  *
- * @help 
+ * @help
  *
  * @param DisableCounterAttrRegionId
+ * @text リージョンID
  * @desc カウンター属性の挙動を無効にするリージョンID
  * @type number
  * @min 1
@@ -26,28 +31,14 @@
  *
  */
 
-
-(function() {
-  'use strict';
-
-  const parameters = PluginManager.parameters('UTSU_DisableCounterAttr');
+(() => {
+  "use strict";
+  const parameters = PluginManager.parameters("UTSU_DisableCounterAttr");
   const params = {};
-  params.DisableCounterAttrRegionId = Number(parameters['DisableCounterAttrRegionId'] || 1);
+  params.DisableCounterAttrRegionId = Number(parameters["DisableCounterAttrRegionId"] || 1);
 
-  Game_Player.prototype.checkEventTriggerThere = function(triggers) {
-    if (this.canStartLocalEvents()) {
-      var direction = this.direction();
-      var x1 = this.x;
-      var y1 = this.y;
-      var x2 = $gameMap.roundXWithDirection(x1, direction);
-      var y2 = $gameMap.roundYWithDirection(y1, direction);
-      this.startMapEvent(x2, y2, triggers, true);
-      if (!$gameMap.isAnyEventStarting() && $gameMap.isCounter(x2, y2) && $gameMap.regionId(x2, y2) !== params.DisableCounterAttrRegionId) {
-        var x3 = $gameMap.roundXWithDirection(x2, direction);
-        var y3 = $gameMap.roundYWithDirection(y2, direction);
-        this.startMapEvent(x3, y3, triggers, true);
-      }
-    }
+  const _Game_Map_isCounter = Game_Map.prototype.isCounter;
+  Game_Map.prototype.isCounter = function (x, y) {
+    return _Game_Map_isCounter.call(this, x, y) && $gameMap.regionId(x, y) !== params.DisableCounterAttrRegionId;
   };
-
-}());
+})();
