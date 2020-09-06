@@ -1,11 +1,15 @@
 //=============================================================================
-// UTSU_PictureBreath.js
+// UTSU_PictureBreath_MZ.js
 // ----------------------------------------------------------------------------
 // Copyright (c) 2020 Utsuda Shinou
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.0.0 2020/09/06 Add support RPG Maker MZ
+//
+// --- Fork from UTSU_PictureBreath.js ----
+//
 // 1.1.3 2020/08/26 Fix bug that breath of pictures in map stops after battle
 // 1.1.2 2020/08/25 Fix to continue picture breath even if picture changed for the same picture number
 // 1.1.1 2020/08/25 Fix bug about init params
@@ -18,8 +22,36 @@
 //=============================================================================
 
 /*:
+ * @target MZ
  * @plugindesc ピクチャ息遣い
  * @author Utsuda Shinou
+ * @url https://github.com/utsudashinou/RPGMakerMV
+ *
+ * @command on
+ * @text ピクチャ息遣いON
+ * @desc
+ *
+ * @arg pictureIds
+ * @text ピクチャ番号
+ * @desc
+ * @type number[]
+ * @min 1
+ *
+ * @arg period
+ * @text 周期
+ * @desc
+ * @type number
+ * @default 150
+ *
+ * @command off
+ * @text ピクチャ息遣いOFF
+ * @desc
+ *
+ * @arg pictureIds
+ * @text ピクチャ番号
+ * @desc
+ * @type number
+ * @min 1
  *
  * @help ピクチャに息遣いの動作を加えます。
  *
@@ -34,17 +66,27 @@
  *
  *
  * * プラグインコマンド
- * UTSU_PictureBreathOn pictureId0, ...pictureIdN, period
- *   息遣いをする。pictureId*は対象のピクチャID、periodは息遣いの周期。
- *   例: UTSU_PictureBreathOn 1 2 3 4 5 150
+ * ◆プラグインコマンド：UTSU_PictureBreath, ピクチャ息遣いON
+ * ：　　　　　　　　　：ピクチャ番号
+ * ：　　　　　　　　　：周期
+ *   息遣いをする。ピクチャ番号は対象のピクチャ番号の配列、周期は息遣いの周期。
+ *   例:
+ *     ◆プラグインコマンド：UTSU_PictureBreath, ピクチャ息遣いON
+ *     ：　　　　　　　　　：ピクチャ番号 = ["1", "2", "3", "4", "5"]
+ *     ：　　　　　　　　　：周期 = 150
  *
- * UTSU_PictureBreathOff pictureId0, ...pictureIdN
+ * ◆プラグインコマンド：UTSU_PictureBreath, ピクチャ息遣いOFF
+ * ：　　　　　　　　　：ピクチャ番号
  *   息遣いをやめる。
- *   例: UTSU_PictureBreathOff 1 2 3 4 5
+ *   例:
+ *     ◆プラグインコマンド：UTSU_PictureBreath, ピクチャ息遣いOFF
+ *     ：　　　　　　　　　：ピクチャ番号 = ["1", "2", "3", "4", "5"]
  *
  */
 
 ((global) => {
+  const pluginName = "UTSU_PictureBreath_MZ";
+
   global.UTSU = global.UTSU || {};
   global.UTSU.PictureBreath = global.UTSU.PictureBreath || {};
 
@@ -81,17 +123,13 @@
     });
   };
 
-  const _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-  Game_Interpreter.prototype.pluginCommand = function (command, args) {
-    _Game_Interpreter_pluginCommand.call(this, command, args);
-    if (command === "UTSU_PictureBreathOn") {
-      const period = args.pop();
-      UTSU.PictureBreath.on(args, period);
-    }
-    if (command === "UTSU_PictureBreathOff") {
-      UTSU.PictureBreath.off(args);
-    }
-  };
+  PluginManager.registerCommand(pluginName, "on", (args) => {
+    UTSU.PictureBreath.on(JSON.parse(args["pictureIds"]), args["period"]);
+  });
+
+  PluginManager.registerCommand(pluginName, "off", (args) => {
+    UTSU.PictureBreath.off(JSON.parse(args["pictureIds"]));
+  });
 
   const _Game_Screen_showPicture = Game_Screen.prototype.showPicture;
   Game_Screen.prototype.showPicture = function (pictureId, name, origin, x, y, scaleX, scaleY, opacity, blendMode) {
